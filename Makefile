@@ -4,9 +4,7 @@ CXXFLAGS = -std=c++17 -Wall -Wextra \
     -I./include \
     -I./include/imgui \
     -I./include/rlImGui
-
 LDFLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-
 TARGET = build/utility
 OBJ_DIR = out
 
@@ -25,18 +23,18 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) -static-libgcc -static-libstdc++
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Windows build
+# Windows build with static linking
 windows:
 	$(MAKE) clean
 	$(MAKE) CXX=x86_64-w64-mingw32-g++ \
 	        CXXFLAGS="-std=c++17 -Wall -Wextra -I./include -I./include/imgui -I./include/rlImGui -I./include/raylibWin64/include" \
-	        LDFLAGS="-L./include/raylibWin64/lib -lraylib -lopengl32 -lgdi32 -lwinmm" \
+	        LDFLAGS="-L./include/raylibWin64/lib -static -lraylib -lopengl32 -lgdi32 -lwinmm -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic" \
 	        TARGET=build/utility.exe
 
 clean:

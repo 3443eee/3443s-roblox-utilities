@@ -84,6 +84,7 @@ Notes:
 #include <iostream>
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN 
     #include <windows.h>
 #else
     #include <linux/input-event-codes.h>
@@ -291,6 +292,15 @@ public:
         return "Unknown";
     }
 
+    //A function that gets the current pressed key.
+    Key getCurrentPressedKey(int timeout_ms = 0) {
+#ifdef _WIN32
+        return getCurrentPressedKeyWindows(timeout_ms);
+#else
+        return getCurrentPressedKeyLinux(timeout_ms);
+#endif
+    }
+
 private:
     std::unordered_map<unsigned int, bool> m_keyStates;
     std::mutex m_keyMutex;
@@ -433,6 +443,47 @@ private:
         if (needShift) releaseKeyWindows(VK_SHIFT);
     }
 
+    Key getCurrentPressedKeyWindows(int timeout_ms) {
+        auto startTime = std::chrono::steady_clock::now();
+        
+        do {
+            // Check all possible virtual key codes
+            for (unsigned int vk = 0x01; vk <= 0xFE; vk++) {
+                // Skip certain keys that shouldn't be bindable
+                if (vk == VK_LBUTTON || vk == VK_RBUTTON || vk == VK_MBUTTON ||
+                    vk == VK_XBUTTON1 || vk == VK_XBUTTON2) {
+                    continue; // Skip mouse buttons (remove this if you want to allow mouse binding)
+                }
+                
+                // Check if key is pressed
+                if (GetAsyncKeyState(vk) & 0x8000) {
+                    // Wait for key to be released before returning
+                    while (GetAsyncKeyState(vk) & 0x8000) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    }
+                    return static_cast<Key>(vk);
+                }
+            }
+            
+            if (timeout_ms == 0) {
+                break; // No wait, check once
+            }
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            
+            if (timeout_ms > 0) {
+                auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startTime
+                ).count();
+                if (elapsed >= timeout_ms) {
+                    break;
+                }
+            }
+            
+        } while (timeout_ms != 0);
+        
+        return static_cast<Key>(0); // No key pressed
+    }
 #else
     // ==================== LINUX IMPLEMENTATION ====================
     int m_uinputFd;
@@ -737,11 +788,70 @@ private:
 
         };
         
+
         if (evdevToVk.count(evdevCode)) {
             return evdevToVk[evdevCode];
         }
         return evdevCode;
     }
+
+    
+    Key getCurrentPressedKeyLinux(int timeout_ms) {
+        auto startTime = std::chrono::steady_clock::now();
+        
+        do {
+            unsigned int pressedKeyCode = 0;
+            bool keyFound = false;
+            
+            // Check for pressed keys in a scoped lock
+            {
+                std::lock_guard<std::mutex> lock(m_keyMutex);
+                
+                // Find the first pressed key
+                for (const auto& pair : m_keyStates) {
+                    if (pair.second) {
+                        pressedKeyCode = pair.first;
+                        keyFound = true;
+                        break;
+                    }
+                }
+            } // Lock is released here
+            
+            // If we found a pressed key, wait for it to be released
+            if (keyFound) {
+                bool released = false;
+                while (!released) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    
+                    // Check if key is still pressed
+                    std::lock_guard<std::mutex> lock(m_keyMutex);
+                    auto it = m_keyStates.find(pressedKeyCode);
+                    released = (it == m_keyStates.end() || !it->second);
+                }
+                
+                return static_cast<Key>(pressedKeyCode);
+            }
+            
+            if (timeout_ms == 0) {
+                break; // No wait, check once
+            }
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            
+            if (timeout_ms > 0) {
+                auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - startTime
+                ).count();
+                if (elapsed >= timeout_ms) {
+                    break;
+                }
+            }
+            
+        } while (timeout_ms != 0);
+        
+        return static_cast<Key>(0); // No key pressed
+    }
+
 #endif
 };
 

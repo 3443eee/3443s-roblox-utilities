@@ -61,6 +61,7 @@ int main() {
 #include <cstring>
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN // Reduces Windows header bloat
     #include <windows.h>
     #include <psapi.h>
     #include <tlhelp32.h>
@@ -68,6 +69,9 @@ int main() {
     #ifndef _PID_T_
         typedef DWORD pid_t;
     #endif
+#undef Rectangle
+#undef CloseWindow  
+#undef ShowCursor
 #else
     #include <csignal>
     #include <unistd.h>
