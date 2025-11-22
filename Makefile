@@ -34,7 +34,7 @@ windows:
 	$(MAKE) clean
 	$(MAKE) CXX=x86_64-w64-mingw32-g++ \
 	        CXXFLAGS="-std=c++17 -Wall -Wextra -I./include -I./include/imgui -I./include/rlImGui -I./include/raylibWin64/include" \
-	        LDFLAGS="-L./include/raylibWin64/lib -static -lraylib -lopengl32 -lgdi32 -lwinmm -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic" \
+	        LDFLAGS="-L./include/raylibWin64/lib -static -lraylib -lopengl32 -lgdi32 -lwinmm -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -mwindows -lpthread -Wl,-Bdynamic" \
 	        TARGET=build/utility.exe
 
 clean:

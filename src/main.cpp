@@ -8,6 +8,7 @@
     #define DrawTextEx Win32DrawTextEx
     #define LoadImage Win32LoadImage
 #endif
+
 #include "procctrl.hpp"
 #include "imgui.h"
 #include "rlImGui.h"
@@ -179,9 +180,11 @@ void extendedDanceClip() {
 std::string current_option = "0";
 std::string current_top_panel = "Macros";
 
+
 int main() {
     // Initialize Raylib window
     InitWindow(500, 400, "3443's Roblox Utilities");
+    SetWindowState(FLAG_WINDOW_UNDECORATED);
     SetTargetFPS(60);
 
     // Initialize rlImGui
@@ -209,16 +212,43 @@ int main() {
 
     kb_layout = 1;
 #ifdef _WIN32
-    roblox_process_name = "RobloxPlayerBeta.exe";
+    roblox_process_name = "notepad.exe";
 #else
     roblox_process_name = "sober";
 #endif
 
+    Vector2 dragOffset = {0};
+    bool isDragging = false;
+
     while (!WindowShouldClose()) {
-    
         freezeMacro();
         laughClip();
         extendedDanceClip();
+        Vector2 mousePos = GetMousePosition();
+        Vector2 windowPos = GetWindowPosition();
+        Vector2 mouseScreenPos = {windowPos.x + mousePos.x, windowPos.y + mousePos.y};
+        
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            isDragging = true;
+            // Store the offset from window position to mouse in screen coordinates
+            dragOffset.x = mouseScreenPos.x - windowPos.x;
+            dragOffset.y = mouseScreenPos.y - windowPos.y;
+        }
+        
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+        {
+            isDragging = false;
+        }
+        
+        if (isDragging)
+        {
+            // Set window position based on screen mouse position minus offset
+            SetWindowPosition(
+                (int)(mouseScreenPos.x - dragOffset.x),
+                (int)(mouseScreenPos.y - dragOffset.y)
+            );
+        }
         BeginDrawing();
         ClearBackground(DARKGRAY);
         
@@ -233,7 +263,6 @@ int main() {
                     ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_NoMove |
                     ImGuiWindowFlags_NoCollapse);
-        
         ImGui::Text("3443's Roblox Utilities");
         ImGui::Separator();
         // Tab Bar
@@ -289,9 +318,9 @@ int main() {
                 
                 ImGui::EndChild();
                 
-                // RIGHT PANEL:
+                // RIGHT PANEL: Use 0,0 to auto-fill remaining space
                 ImGui::SameLine();
-                ImGui::BeginChild("Right Panel", ImVec2(window_size.x - left_width - 10, window_size.y), true);
+                ImGui::BeginChild("Right Panel", ImVec2(0, 0), true);
                 if (current_option == "Freeze") {
                     ImGui::Text("Freeze information:");
                     ImGui::TextWrapped("This macro freezes the roblox/sober process.\nIt allows for some pretty cool glitches.");
