@@ -1,30 +1,32 @@
 #include "raylib.h"
+
 #ifdef _WIN32
-    #define WIN32_LEAN_AND_MEAN
-    #define Rectangle Win32Rectangle
-    #define CloseWindow Win32CloseWindow
-    #define ShowCursor Win32ShowCursor  
-    #define DrawText Win32DrawText
-    #define DrawTextEx Win32DrawTextEx
-    #define LoadImage Win32LoadImage
+#define WIN32_LEAN_AND_MEAN
+// Define these BEFORE including Globals.hpp
+#define Rectangle Win32Rectangle
+#define CloseWindow Win32CloseWindow
+#define ShowCursor Win32ShowCursor  
+#define DrawText Win32DrawText
+#define DrawTextEx Win32DrawTextEx
+#define LoadImage Win32LoadImage
+#include <windows.h>  // Include Windows headers here with renames active
+#undef Rectangle
+#undef CloseWindow
+#undef ShowCursor
+#undef DrawText
+#undef DrawTextEx
+#undef LoadImage
 #endif
 
 #include "Globals.hpp"
 #include "procctrl.hpp"
+#include "netctrl.hpp"
+#include "LagSwitch.hpp"
+#include "Macros.hpp"
+#include "Helper.hpp"
+#include "UserInterface.hpp"
 #include "imgui.h"
 #include "rlImGui.h"
-#include "Helper.hpp"
-#include "Macros.hpp"
-#include "UserInterface.hpp"
-
-#ifdef _WIN32
-    #undef Rectangle
-    #undef CloseWindow
-    #undef ShowCursor
-    #undef DrawText
-    #undef DrawTextEx
-    #undef LoadImage
-#endif
 
 #include <iostream>
 #include <string>
@@ -47,6 +49,10 @@ int main() {
     //Initializes the user interface.
     initUI();
     
+    //Initlializes the ctrl object for netctrl
+    
+    g_ctrl = &ctrl;
+
     //Initializes the input object.
     if (!input.init()) {
         std::cerr << "Failed to initialize input system!\n";
@@ -69,7 +75,10 @@ int main() {
         freezeMacro();
         laughClip();
         extendedDanceClip();
-
+        LagSwitch();
+        
+        // Dragging the window for windows.
+#ifdef _WIN32
         Vector2 mousePos = GetMousePosition();
         Vector2 windowPos = GetWindowPosition();
         Vector2 mouseScreenPos = {windowPos.x + mousePos.x, windowPos.y + mousePos.y};
@@ -95,6 +104,8 @@ int main() {
                 (int)(mouseScreenPos.y - dragOffset.y)
             );
         }
+#endif
+
         BeginDrawing();
         ClearBackground(DARKGRAY);
         

@@ -34,3 +34,15 @@ inline void bindToMacro(std::string macro_name) {
         events[3] = false;
     }
 }
+
+inline unsigned short GetIDFromCodeName(std::string CodeName) {
+    if (CodeName == "Freeze") {
+        return 0;
+    } else if (CodeName == "Laugh") {
+        return 1;
+    } else if (CodeName == "E-Dance") {
+        return 2;
+    } else if (CodeName == "Lag-switch") {
+        return 4;
+    } else return 2000;
+}

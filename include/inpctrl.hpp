@@ -321,7 +321,7 @@ private:
     // ==================== WINDOWS IMPLEMENTATION ====================
     HHOOK m_hookHandle;
     
-    static CrossInput* s_instance;
+    static CrossInput* s_instance;  // Declaration only
     
     static LRESULT CALLBACK keyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (nCode == HC_ACTION && s_instance) {
@@ -856,7 +856,7 @@ private:
 };
 
 #ifdef _WIN32
-CrossInput* CrossInput::s_instance = nullptr;
+inline CrossInput* CrossInput::s_instance = nullptr;
 #endif
 
 #endif // INPCTRL_HPP
