@@ -14,4 +14,5 @@ inline void UpdateMacros() {
     if (enabled[4]) LagSwitch();
     if (enabled[5]) BuckeyClip();
     if (enabled[6]) speedglitchMacro();
+    if (enabled[7]) SpamKeyMacro();
 }

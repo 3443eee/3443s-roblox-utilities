@@ -111,6 +111,12 @@ inline namespace LagSwitchNamespace {
             log("[netctrl] Failed to apply lag/drop.");
             return false;
 #endif
+        } else {
+            if (ctrl.lag(1, 100)) {
+                log("[netctrl] Applied " + std::to_string(lag_ms) + "ms, " + std::to_string(drop_pct) + "% drop");
+                TrafficBlocked = true;
+                return true;
+            }
         }
         
         log("[netctrl] No disconnection prevention active.");

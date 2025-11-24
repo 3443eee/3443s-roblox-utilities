@@ -45,27 +45,23 @@ WIN_OBJ_DIR = out/win64
 WIN_TARGET = build/win64/utility.exe
 WIN_CXX = x86_64-w64-mingw32-g++
 WIN_CXXFLAGS = -std=c++17 -Wall -Wextra $(INCLUDES) -I./include/raylibWin64/include
+
 WIN_LDFLAGS = -L./include/raylibWin64/lib -static -lraylib -lopengl32 -lgdi32 -lwinmm \
               -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -mwindows -lshell32 -lpthread -Wl,-Bdynamic
 
+WIN_ICON = resources/icon.o   # ← your precompiled icon resource
+
 WIN_OBJS = $(patsubst %.cpp,$(WIN_OBJ_DIR)/%.o,$(SRCS))
-MANIFEST_RC = ./src/windows/utility.rc
-MANIFEST_RES = ./build/manifest.res
 
 windows: $(WIN_TARGET)
-
-$(MANIFEST_RES): $(MANIFEST_RC)
-	mkdir -p $(dir $@)
-	x86_64-w64-mingw32-windres $< -O coff -o $@
 
 $(WIN_OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
 	$(WIN_CXX) $(WIN_CXXFLAGS) -c $< -o $@
 
-$(WIN_TARGET): $(WIN_OBJS) $(MANIFEST_RES)
+$(WIN_TARGET): $(WIN_OBJS) $(WIN_ICON)
 	mkdir -p $(dir $@)
 	$(WIN_CXX) -o $@ $^ $(WIN_LDFLAGS)
-	rm -f $(MANIFEST_RES)
 
 # -------------------------------------------------------------------
 # Clean targets

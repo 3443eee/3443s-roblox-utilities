@@ -42,10 +42,15 @@ int main() {
     runXhostPlus();
     is_elevated = isElevated();
 #endif
-    // Initialize Raylib window
-    if (is_elevated) {
+
+#ifdef _WIN32
+    is_elevated = true;
+    InitWindow(500, 400, "3443's Roblox Utilities");
+#else
+     if (is_elevated) {
         InitWindow(500, 400, "3443's Roblox Utilities");
     } else InitWindow(300, 150, "3443's Roblox Utilities");
+#endif
     
     // No window border for windows :p
 #ifdef _WIN32
@@ -69,7 +74,7 @@ int main() {
     }
     
 #ifdef _WIN32
-    roblox_process_name = "notepad.exe";
+    roblox_process_name = "RobloxPlayerBeta.exe";
 #else
     roblox_process_name = "sober";
 #endif

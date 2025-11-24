@@ -178,10 +178,22 @@ inline void bindToMacro(std::string macro_name) {
         events[3] = true;
         CrossInput::Key userKey = input.getCurrentPressedKey(5000); // 5 sec timeout
         if (userKey != static_cast<CrossInput::Key>(0)) {
-            std::cout << "[3RU] [procctrl] Bound: " << input.getKeyName(userKey) << std::endl;
+            std::cout << "[3RU] [inpctrl] Bound: " << input.getKeyName(userKey) << std::endl;
             Binds[macro_name] = userKey;
         }
         events[3] = false;
+    }
+}
+
+inline void BindSpamKey() {
+    if (!events[8]) { 
+        events[8] = true;
+        CrossInput::Key userKey = input.getCurrentPressedKey(5000); // 5 sec timeout
+        if (userKey != static_cast<CrossInput::Key>(0)) {
+            std::cout << "[3RU] [inpctrl] Bound: " << input.getKeyName(userKey) << std::endl;
+            SpamKey = userKey;
+        }
+        events[8] = false;
     }
 }
 
@@ -196,7 +208,9 @@ inline unsigned short GetIDFromCodeName(std::string CodeName) {
         return 4;
     } else if (CodeName == "Buckey-clip") {
         return 5;
-    } else if (CodeName == "") {
-        return 5;
+    } else if (CodeName == "Speedglitch") {
+        return 6;
+    } else if (CodeName == "Spam-Key") {
+        return 7;
     } else return 2000;
 }

@@ -18,6 +18,8 @@ inline bool elevationFailed = false;
 //-- Speed glitch
 inline std::atomic<bool> speedglitch_active(false);
 inline std::thread speedglitch_thread;
+//-- Spam button
+inline CrossInput::Key SpamKey = CrossInput::Key::Num1;
 
 // Settings
 inline int speed_pixels_x = 716;  // Default for 0.5 sensitivity without cam-fix
@@ -29,7 +31,7 @@ inline ImVec4 themeColor = ImVec4(0.8f, 0.1f, 0.1f, 1.0f); // Default red theme
 inline std::string roblox_process_name;
 
 // Debounces
-inline bool events[7] {
+inline bool events[9] {
     false, // Freeze
     false, // Laugh clip
     false, // E-Dance clip
@@ -37,9 +39,11 @@ inline bool events[7] {
     false, // For lag switch
     false, // buckey clip
     false, // Filler - do not use
+    false, // gear clip
+    false, // gear clip bind
 };
 
-inline bool enabled[7] {
+inline bool enabled[9] {
     true, // Freeze
     true, // Laugh clip
     false, // E-Dance clip
@@ -47,6 +51,8 @@ inline bool enabled[7] {
     true, // For lag switch
     true, // buckey clip
     false, // Speed glitch
+    false, // Gear clip
+    false, // align / filler
 };
 
 inline std::map<std::string, CrossInput::Key> Binds = {
@@ -55,7 +61,8 @@ inline std::map<std::string, CrossInput::Key> Binds = {
     {"E-Dance", CrossInput::Key::F3}, // Extended Dance
     {"Lag-switch", CrossInput::Key::F4}, // Lag switch
     {"Buckey-clip", CrossInput::Key::F5}, // Buckey clip
-    {"Speedglitch", CrossInput::Key::F6} // Speed glitch
+    {"Speedglitch", CrossInput::Key::F6}, // Speed glitch
+    {"Spam-Key", CrossInput::Key::F7} // Gear clip
 };
 
 inline unsigned short kb_layout;

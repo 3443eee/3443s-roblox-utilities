@@ -115,7 +115,6 @@ inline void BuckeyClip() {
         } else {
             input.typeText("/e laugh");
         } 
-        // Wait from V release → Space down (~200ms)
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         // --- Space key ---
@@ -141,14 +140,20 @@ inline void BuckeyClip() {
         std::this_thread::sleep_for(std::chrono::milliseconds(82));
         input.releaseKey(CrossInput::Key::S);
 
-        // Wait ~1.1s until the final Shift tap
-        std::this_thread::sleep_for(std::chrono::milliseconds(1138)); // from last release to next Shift down
-
-        // --- Final Shift tap ---
-        input.holdKey(CrossInput::Key::LShift);
-        std::this_thread::sleep_for(std::chrono::milliseconds(145)); // held duration
-        input.releaseKey(CrossInput::Key::LShift);
         events[5] = false;
         log("Buckeyclip finished");
+    }
+}
+
+
+inline void SpamKeyMacro() {
+    bool key_pressed = input.isKeyPressed(Binds["Spam-Key"]);
+    if (key_pressed && !events[7]) {
+        events[7] = true;
+        log("Spam key triggering");
+        input.pressKey(SpamKey, 1);
+    } else if (!key_pressed && events[7]) {
+        events[7] = false;
+        log("Spam key triggering");
     }
 }

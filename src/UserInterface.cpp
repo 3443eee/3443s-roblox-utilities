@@ -153,7 +153,7 @@ void UpdateUI() {
 
                 if (std::string(label) == "Freeze") {
                     CodeName = "Freeze";
-                } else if (std::string(label) == "Laugh Clip") {
+                } else if (std::string(label) == "Extended Laugh Clip") {
                     CodeName = "Laugh";
                 } else if (std::string(label) == "Extended Dance Clip") {
                     CodeName = "E-Dance";
@@ -161,6 +161,8 @@ void UpdateUI() {
                     CodeName = "Buckey-clip";
                 } else if (std::string(label) == "Speed glitch") {
                     CodeName = "Speedglitch";
+                } else if (std::string(label) == "Spam key") {
+                    CodeName = "Spam-Key";
                 }
                 // Determine if this option is enabled
                 bool isEnabled = enabled[GetIDFromCodeName(CodeName)];
@@ -194,12 +196,23 @@ void UpdateUI() {
                 }
 
                 if (current_option == label) {
-                    ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), ImVec2(0, 100), true);
+                    if (CodeName == "Spam-Key") {
+                        ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), ImVec2(0, 120), true);
+                    } else {
+                        ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), ImVec2(0, 80), true);
+                    }
+
                     ImGui::TextWrapped("Enabled: %s", enabled[GetIDFromCodeName(CodeName)] ? "Yes" : "No");
                     ImGui::Separator();
                     ImGui::Text("Current keybind %s", input.getKeyName(Binds[CodeName]).c_str());
                     if (ImGui::Button("Change", ImVec2(-1, 20.0f))) {
                         bindToMacro(CodeName);
+                    }
+                    if (CodeName == "Spam-Key") {
+                        ImGui::Text("Current spam key %s", input.getKeyName(SpamKey).c_str());
+                        if (ImGui::Button("Bind spam key", ImVec2(-1, 20.0f))) {
+                            BindSpamKey();
+                        }
                     }
                     ImGui::EndChild();
                 }
@@ -207,10 +220,11 @@ void UpdateUI() {
 
             // Draw buttons
             DrawOptionButton("Freeze");
-            DrawOptionButton("Laugh Clip");
+            DrawOptionButton("Extended Laugh Clip");
             DrawOptionButton("Extended Dance Clip");
             DrawOptionButton("Buckey clip");
             DrawOptionButton("Speed glitch");
+            DrawOptionButton("Spam key");
 
             ImGui::EndChild();
 
@@ -274,6 +288,19 @@ void UpdateUI() {
 
                 ImGui::Spacing();
                 ImGui::TextColored(orange,"Also, if you're willing to use this,\nPLEASE look in the 'Roblox specific'\nsection in settings.");
+            } else if (current_option == "Spam key") {
+                ImGui::Text("Spam key information:");
+                ImGui::Separator();
+                ImGui::TextWrapped("This macro allows you to spam a key in your keyboard very fast. You can use it to gear clip for example.\n\nTo gear clip, please set up yourself and the camera like below:\n");
+                float windowWidth = ImGui::GetContentRegionAvail().x;
+                float imageWidth = 248.0f;
+                float offset = (windowWidth - imageWidth) * 0.5f;
+
+                if (offset > 0.0f)
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                rlImGuiImageSize(&LoadedTextures[3], 248, 140);
+                ImGui::TextWrapped("After this, it's pretty straightforward, just trigger the macro and hold W! This glitch can be rng, but you'll get it, especially with low fps.");
             } else {
                 ImGui::Text("Welcome to 3443's roblox utilities!");
                 ImGui::Separator();
@@ -313,9 +340,9 @@ void UpdateUI() {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Subplace joiner")) {
-            ImGui::EndTabItem();
-        }
+        //if (ImGui::BeginTabItem("Subplace joiner")) {
+          //  ImGui::EndTabItem();
+        //}
 
         if (ImGui::BeginTabItem("Settings")) {
             // ==== GLOBAL SETTINGS ====

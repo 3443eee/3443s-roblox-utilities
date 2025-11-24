@@ -1,6 +1,7 @@
 #pragma once
 #include "Globals.hpp"
 #include "Helper.hpp"
+#include "raylib.h"
 #include <cmath>
 
 // Calculate pixel value for 180° rotation based on sensitivity
@@ -105,6 +106,7 @@ inline void updateSpeedglitchSensitivity(float new_sensitivity, bool new_cam_fix
 
 // Update FPS (call this when user changes FPS setting)
 inline void updateSpeedglitchFPS(int new_fps) {
+    SetTargetFPS(new_fps);
     roblox_fps = new_fps;
     log("Speedglitch FPS updated to: " + std::to_string(new_fps));
 }

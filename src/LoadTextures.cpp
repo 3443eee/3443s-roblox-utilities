@@ -27,4 +27,5 @@ void LoadAllSprites() {
     LoadTextureFromFile("resources/e-dance-clip.jpg"); // 0
     LoadTextureFromFile("resources/laugh.jpg"); // 1
     LoadTextureFromFile("resources/buckey.jpg"); // 2
+    LoadTextureFromFile("resources/Gear-clip.jpg"); // 3
 }
