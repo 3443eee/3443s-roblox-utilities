@@ -98,3 +98,57 @@ inline void extendedDanceClip() {
         log("Extended Dance clip finished");
     }
 }
+
+inline void BuckeyClip() {
+    bool key_pressed = input.isKeyPressed(Binds["Buckey-clip"]);
+    if (key_pressed && !events[5]) {
+        events[5] = true;
+        log("Buckey clip triggered");
+
+        input.pressKey(CrossInput::Key::Slash);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        if (kb_layout == 1) {
+            typeSlash();
+            input.typeText("e lqugh");
+            input.pressKey(CrossInput::Key::Enter);
+        } else {
+            input.typeText("/e laugh");
+        } 
+        // Wait from V release → Space down (~200ms)
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+        // --- Space key ---
+        input.holdKey(CrossInput::Key::Space);
+
+        // Wait 31ms → S down while Space is still held
+        std::this_thread::sleep_for(std::chrono::milliseconds(31));
+        input.holdKey(CrossInput::Key::S);
+
+        // Wait 9ms → Shift down while Space+S are still held
+        std::this_thread::sleep_for(std::chrono::milliseconds(9));
+        input.holdKey(CrossInput::Key::LShift);
+
+        // Release Space after 74ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(74));
+        input.releaseKey(CrossInput::Key::Space);
+
+        // Release Shift after 56ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(56));
+        input.releaseKey(CrossInput::Key::LShift);
+
+        // Release S after 82ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(82));
+        input.releaseKey(CrossInput::Key::S);
+
+        // Wait ~1.1s until the final Shift tap
+        std::this_thread::sleep_for(std::chrono::milliseconds(1138)); // from last release to next Shift down
+
+        // --- Final Shift tap ---
+        input.holdKey(CrossInput::Key::LShift);
+        std::this_thread::sleep_for(std::chrono::milliseconds(145)); // held duration
+        input.releaseKey(CrossInput::Key::LShift);
+        events[5] = false;
+        log("Buckeyclip finished");
+    }
+}

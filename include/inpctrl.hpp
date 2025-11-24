@@ -493,8 +493,8 @@ private:
         // Initialize uinput for output
         m_uinputFd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
         if (m_uinputFd < 0) {
-            std::cerr << "Failed to open /dev/uinput. Run with sudo!" << std::endl;
-            return false;
+            std::cout << "Failed to open /dev/uinput. Run with sudo!" << std::endl;
+            return true;
         }
         
         struct uinput_setup setup;

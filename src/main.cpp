@@ -22,11 +22,12 @@
 #include "procctrl.hpp"
 #include "netctrl.hpp"
 #include "LagSwitch.hpp"
-#include "Macros.hpp"
+#include "MacroLoopHandler.hpp"
 #include "Helper.hpp"
 #include "UserInterface.hpp"
 #include "imgui.h"
 #include "rlImGui.h"
+#include "LoadTextures.hpp"
 
 #include <iostream>
 #include <string>
@@ -36,18 +37,26 @@
 #include <map>
 
 int main() {
+#if defined(__linux__)
+    //Fix for unable to open display ":0" on wayland
+    runXhostPlus();
+    is_elevated = isElevated();
+#endif
     // Initialize Raylib window
-    InitWindow(500, 400, "3443's Roblox Utilities");
-
+    if (is_elevated) {
+        InitWindow(500, 400, "3443's Roblox Utilities");
+    } else InitWindow(300, 150, "3443's Roblox Utilities");
+    
     // No window border for windows :p
 #ifdef _WIN32
     SetWindowState(FLAG_WINDOW_UNDECORATED);
 #endif
-
+    
     SetTargetFPS(60);
 
     //Initializes the user interface.
     initUI();
+    LoadAllSprites();
     
     //Initlializes the ctrl object for netctrl
     
@@ -58,7 +67,7 @@ int main() {
         std::cerr << "Failed to initialize input system!\n";
         return 1;
     }
-
+    
 #ifdef _WIN32
     roblox_process_name = "notepad.exe";
 #else
@@ -68,14 +77,13 @@ int main() {
     //temporary
     kb_layout = 1;
 
+    initMacros();
+    
     Vector2 dragOffset = {0};
     bool isDragging = false;
-
+    
     while (!WindowShouldClose()) {
-        freezeMacro();
-        laughClip();
-        extendedDanceClip();
-        LagSwitch();
+       UpdateMacros();
         
         // Dragging the window for windows.
 #ifdef _WIN32

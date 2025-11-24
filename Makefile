@@ -1,22 +1,5 @@
-# Number of cores for parallel builds
+# Parallel builds
 MAKEFLAGS += -j$(shell nproc)
-
-# Compiler
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra \
-    -I./include \
-    -I./src/headers \
-    -I./include/imgui \
-    -I./include/rlImGui
-
-# Linker flags
-LDFLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-
-# Target binary
-TARGET = build/utility
-
-# Object directories
-OBJ_DIR = out/linux
 
 # Source files
 SRCS = $(shell find src -name "*.cpp") \
@@ -26,33 +9,74 @@ SRCS = $(shell find src -name "*.cpp") \
        include/imgui/imgui_widgets.cpp \
        include/rlImGui/rlImGui.cpp
 
-# Object files
-OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRCS))
+# Include directories
+INCLUDES = -I./include \
+           -I./src/headers/obstructive \
+           -I./src/headers \
+           -I./include/imgui \
+           -I./include/rlImGui
 
-# Default Linux build
-all: $(TARGET)
+# -------------------------------------------------------------------
+# Linux build
+# -------------------------------------------------------------------
 
-$(TARGET): $(OBJS)
+LINUX_OBJ_DIR = out/linux
+LINUX_TARGET = build/linux/utility
+LINUX_LDFLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+LINUX_OBJS = $(patsubst %.cpp,$(LINUX_OBJ_DIR)/%.o,$(SRCS))
+
+all: linux
+
+linux: $(LINUX_TARGET)
+
+$(LINUX_TARGET): $(LINUX_OBJS)
 	mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) -static-libgcc -static-libstdc++
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LINUX_LDFLAGS) -static-libgcc -static-libstdc++
 
-# Compile object files (incremental)
-$(OBJ_DIR)/%.o: %.cpp
+$(LINUX_OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
+# -------------------------------------------------------------------
 # Windows build
-windows:
-	$(MAKE) CXX=x86_64-w64-mingw32-g++ \
-	        OBJ_DIR=out/win64 \
-	        CXXFLAGS="-std=c++17 -Wall -Wextra -I./include -I./src/headers -I./include/imgui -I./include/rlImGui -I./include/raylibWin64/include" \
-	        LDFLAGS="-L./include/raylibWin64/lib -static -lraylib -lopengl32 -lgdi32 -lwinmm -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -mwindows -lpthread -Wl,-Bdynamic" \
-	        TARGET=build/utility.exe
+# -------------------------------------------------------------------
 
-# Clean build and object directories
-clean:
-	rm -rf build
+WIN_OBJ_DIR = out/win64
+WIN_TARGET = build/win64/utility.exe
+WIN_CXX = x86_64-w64-mingw32-g++
+WIN_CXXFLAGS = -std=c++17 -Wall -Wextra $(INCLUDES) -I./include/raylibWin64/include
+WIN_LDFLAGS = -L./include/raylibWin64/lib -static -lraylib -lopengl32 -lgdi32 -lwinmm \
+              -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -mwindows -lshell32 -lpthread -Wl,-Bdynamic
+
+WIN_OBJS = $(patsubst %.cpp,$(WIN_OBJ_DIR)/%.o,$(SRCS))
+MANIFEST_RC = ./src/windows/utility.rc
+MANIFEST_RES = ./build/manifest.res
+
+windows: $(WIN_TARGET)
+
+$(MANIFEST_RES): $(MANIFEST_RC)
+	mkdir -p $(dir $@)
+	x86_64-w64-mingw32-windres $< -O coff -o $@
+
+$(WIN_OBJ_DIR)/%.o: %.cpp
+	mkdir -p $(dir $@)
+	$(WIN_CXX) $(WIN_CXXFLAGS) -c $< -o $@
+
+$(WIN_TARGET): $(WIN_OBJS) $(MANIFEST_RES)
+	mkdir -p $(dir $@)
+	$(WIN_CXX) -o $@ $^ $(WIN_LDFLAGS)
+	rm -f $(MANIFEST_RES)
+
+# -------------------------------------------------------------------
+# Clean targets
+# -------------------------------------------------------------------
+
+clean: clean-linux clean-windows
+
+clean-linux:
+	rm -rf build/linux
 	rm -rf out/linux
-	rm -rf out/win64
 
-.PHONY: all windows clean
+clean-windows:
+	rm -rf build/win64
+	rm -rf out/win64

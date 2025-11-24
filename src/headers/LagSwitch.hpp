@@ -7,7 +7,7 @@
 
 inline namespace LagSwitchNamespace {
     inline bool TrafficBlocked = false;
-    inline bool CanDisconnect = false;
+    inline bool PreventDisconnection = true;  // replaces CanDisconnect
     inline int LagTimeMilliseconds = 1;
     inline float PacketLossPercentage = 99.5f;
     inline bool customValuesAllowed = false;
@@ -16,7 +16,6 @@ inline namespace LagSwitchNamespace {
     inline HANDLE fumbleJob = NULL;
     inline PROCESS_INFORMATION fumbleProcess{};
     
-    // Initialize job object once
     inline void initFumbleJob() {
         if (!fumbleJob) {
             fumbleJob = CreateJobObjectA(NULL, NULL);
@@ -31,7 +30,6 @@ inline namespace LagSwitchNamespace {
         }
     }
     
-    // RAII wrapper to ensure cleanup
     struct FumbleGuard {
         ~FumbleGuard() {
             if (fumbleProcess.hProcess) {
@@ -41,7 +39,7 @@ inline namespace LagSwitchNamespace {
                 ZeroMemory(&fumbleProcess, sizeof(fumbleProcess));
             }
             if (fumbleJob) {
-                CloseHandle(fumbleJob);  // This kills all processes in the job
+                CloseHandle(fumbleJob);
                 fumbleJob = NULL;
             }
         }
@@ -60,75 +58,63 @@ inline namespace LagSwitchNamespace {
         int lag_ms = customValuesAllowed ? LagTimeMilliseconds : 1;
         float drop_pct = customValuesAllowed ? PacketLossPercentage : 99.5f;
         
-        // Full disconnect mode
-        if (CanDisconnect) {
-            if (ctrl.block()) {
-                log("[netctrl] Blocked all traffic.");
+        // Use PreventDisconnection instead of CanDisconnect
+        if (PreventDisconnection) {
+            log("[netctrl] Preventing disconnection by simulating lag/drop...");
+#ifdef _WIN32
+            initFumbleJob();
+            
+            std::stringstream ss;
+            ss << "resources\\fumble.exe"
+               << " --lag " << lag_ms
+               << " --drop " << drop_pct
+               << " --filter \"udp.DstPort >= 49152\"";
+            
+            std::string cmd = ss.str();
+            log("Running: " + cmd);
+            
+            std::vector<char> cmdBuffer(cmd.begin(), cmd.end());
+            cmdBuffer.push_back('\0');
+            
+            STARTUPINFOA si{};
+            si.cb = sizeof(si);
+            ZeroMemory(&fumbleProcess, sizeof(fumbleProcess));
+            
+            if (!CreateProcessA(
+                NULL,
+                cmdBuffer.data(),
+                NULL, NULL, FALSE,
+                CREATE_NO_WINDOW | CREATE_SUSPENDED,
+                NULL, NULL, &si, &fumbleProcess
+            )) {
+                log("Failed to launch fumble.exe. Error: " + std::to_string(GetLastError()));
+                return false;
+            }
+            
+            if (fumbleJob) {
+                if (!AssignProcessToJobObject(fumbleJob, fumbleProcess.hProcess)) {
+                    log("Warning: Failed to assign fumble to job object");
+                }
+            }
+            
+            ResumeThread(fumbleProcess.hThread);
+            log("Fumble launched successfully.");
+            TrafficBlocked = true;
+            return true;
+#else
+            if (ctrl.lag(lag_ms, static_cast<double>(drop_pct))) {
+                log("[netctrl] Applied " + std::to_string(lag_ms) + "ms, " +
+                    std::to_string(drop_pct) + "% drop");
                 TrafficBlocked = true;
                 return true;
             }
-            log("[netctrl] Failed to block traffic.");
+            log("[netctrl] Failed to apply lag/drop.");
             return false;
-        }
-        
-#ifdef _WIN32
-        // Initialize job object for auto-cleanup
-        initFumbleJob();
-        
-        // Windows - use fumble.exe
-        std::stringstream ss;
-        ss << "resources\\fumble.exe"
-           << " --lag " << lag_ms
-           << " --drop " << drop_pct
-           << " --filter \"udp.DstPort >= 49152\"";
-        
-        std::string cmd = ss.str();
-        log("Running: " + cmd);
-        
-        // CreateProcessA needs modifiable buffer
-        std::vector<char> cmdBuffer(cmd.begin(), cmd.end());
-        cmdBuffer.push_back('\0');
-        
-        STARTUPINFOA si{};
-        si.cb = sizeof(si);
-        ZeroMemory(&fumbleProcess, sizeof(fumbleProcess));
-        
-        if (!CreateProcessA(
-            NULL,
-            cmdBuffer.data(),
-            NULL, NULL, FALSE, 
-            CREATE_NO_WINDOW | CREATE_SUSPENDED,  // Start suspended to add to job first
-            NULL, NULL, &si, &fumbleProcess
-        )) {
-            log("Failed to launch fumble.exe. Error: " + std::to_string(GetLastError()));
-            return false;
-        }
-        
-        // Add to job object - fumble will die when program exits
-        if (fumbleJob) {
-            if (!AssignProcessToJobObject(fumbleJob, fumbleProcess.hProcess)) {
-                log("Warning: Failed to assign fumble to job object");
-            }
-        }
-        
-        // Now resume the process
-        ResumeThread(fumbleProcess.hThread);
-        
-        log("Fumble launched successfully.");
-        TrafficBlocked = true;
-        return true;
-#else
-        // Linux - use netctrl
-        if (ctrl.lag(lag_ms, static_cast<double>(drop_pct))) {
-            log("[netctrl] Applied " + std::to_string(lag_ms) + "ms, " +
-                std::to_string(drop_pct) + "% drop");
-            TrafficBlocked = true;
-            return true;
-        }
-        
-        log("[netctrl] Failed to apply lag/drop.");
-        return false;
 #endif
+        }
+        
+        log("[netctrl] No disconnection prevention active.");
+        return false;
     }
     
     inline bool UnblockTraffic() {
@@ -140,7 +126,6 @@ inline namespace LagSwitchNamespace {
         log("Unblocking outbound traffic for " + roblox_process_name);
         
 #ifdef _WIN32
-        // Windows - kill fumble.exe if running
         if (fumbleProcess.hProcess) {
             log("Terminating fumble process...");
             TerminateProcess(fumbleProcess.hProcess, 0);
@@ -150,12 +135,11 @@ inline namespace LagSwitchNamespace {
         }
 #endif
         
-        // Disable netctrl (works for both platforms)
-        log("Disabling netctrl...");
+        log("[netctrl] Disabling netctrl...");
         ctrl.disable();
         
         TrafficBlocked = false;
-        log("Unblocked.");
+        log("[netctrl] Unblocked.");
         return true;
     }
 }
