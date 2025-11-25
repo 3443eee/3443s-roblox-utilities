@@ -80,11 +80,12 @@ inline namespace LagSwitchNamespace {
             log("[netctrl] Preventing disconnection by simulating lag/drop...");
 #ifdef _WIN32
             initFumbleJob();
-            
+
+            double drop_prob = drop_pct / 100.0;
             std::stringstream ss;
-            ss << " --lag " << lag_ms
-               << " --drop " << drop_pct
-               << " --filter \"udp.DstPort >= 49152\"";
+            ss << " --filter \"outbound and udp and udp.DstPort >= 49152\"";
+            ss << " --delay-duration " << lag_ms;
+            ss << " --drop-probability " << drop_prob;
             
             std::string params = ss.str();
             
