@@ -1,13 +1,30 @@
 #pragma once
 #include <cstdlib>
+#include <sstream>
 #include "Globals.hpp"
 #include "inpctrl.hpp"
 #include "Helper.hpp"
 #include "netctrl.hpp"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
+
+#include <windows.h>
+#include <shellapi.h>
+
+#else
+#include <unistd.h>
+#endif
+
 inline namespace LagSwitchNamespace {
     inline bool TrafficBlocked = false;
-    inline bool PreventDisconnection = true;  // replaces CanDisconnect
+    inline bool PreventDisconnection = true;
     inline int LagTimeMilliseconds = 1;
     inline float PacketLossPercentage = 99.5f;
     inline bool customValuesAllowed = false;
@@ -65,31 +82,39 @@ inline namespace LagSwitchNamespace {
             initFumbleJob();
             
             std::stringstream ss;
-            ss << "resources\\fumble.exe"
-               << " --lag " << lag_ms
+            ss << " --lag " << lag_ms
                << " --drop " << drop_pct
                << " --filter \"udp.DstPort >= 49152\"";
             
-            std::string cmd = ss.str();
-            log("Running: " + cmd);
+            std::string params = ss.str();
             
-            std::vector<char> cmdBuffer(cmd.begin(), cmd.end());
-            cmdBuffer.push_back('\0');
+            SHELLEXECUTEINFOA sei = {};
+            sei.cbSize = sizeof(sei);
+            sei.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NO_CONSOLE;
+            sei.lpVerb = "runas";  // Request admin elevation
+            sei.lpFile = "resources\\fumble.exe";
+            sei.lpParameters = params.c_str();
+            sei.nShow = SW_HIDE;
             
-            STARTUPINFOA si{};
-            si.cb = sizeof(si);
-            ZeroMemory(&fumbleProcess, sizeof(fumbleProcess));
+            log("Launching fumble.exe with elevation: " + params);
             
-            if (!CreateProcessA(
-                NULL,
-                cmdBuffer.data(),
-                NULL, NULL, FALSE,
-                CREATE_NO_WINDOW | CREATE_SUSPENDED,
-                NULL, NULL, &si, &fumbleProcess
-            )) {
-                log("Failed to launch fumble.exe. Error: " + std::to_string(GetLastError()));
+            if (!ShellExecuteExA(&sei)) {
+                DWORD error = GetLastError();
+                if (error == ERROR_CANCELLED) {
+                    log("User cancelled UAC prompt");
+                } else {
+                    log("Failed to launch fumble.exe. Error: " + std::to_string(error));
+                }
                 return false;
             }
+            
+            if (!sei.hProcess) {
+                log("Failed to get fumble process handle");
+                return false;
+            }
+            
+            fumbleProcess.hProcess = sei.hProcess;
+            fumbleProcess.dwProcessId = GetProcessId(sei.hProcess);
             
             if (fumbleJob) {
                 if (!AssignProcessToJobObject(fumbleJob, fumbleProcess.hProcess)) {
@@ -97,8 +122,7 @@ inline namespace LagSwitchNamespace {
                 }
             }
             
-            ResumeThread(fumbleProcess.hThread);
-            log("Fumble launched successfully.");
+            log("Fumble launched successfully with admin privileges.");
             TrafficBlocked = true;
             return true;
 #else

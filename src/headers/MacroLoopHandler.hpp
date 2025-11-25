@@ -1,6 +1,7 @@
 #pragma once
-#include "Macros.hpp"
 #include "Globals.hpp"
+#include "Macros.hpp"
+#include "LagSwitch.hpp"
 #include "Speedglitch.hpp"
 
 inline void initMacros() {

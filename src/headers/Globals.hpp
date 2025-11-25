@@ -18,6 +18,7 @@ inline bool elevationFailed = false;
 //-- Speed glitch
 inline std::atomic<bool> speedglitch_active(false);
 inline std::thread speedglitch_thread;
+
 //-- Spam button
 inline CrossInput::Key SpamKey = CrossInput::Key::Num1;
 
@@ -29,9 +30,10 @@ inline float roblox_sensitivity = 0.5f;
 inline bool cam_fix_active = false;
 inline ImVec4 themeColor = ImVec4(0.8f, 0.1f, 0.1f, 1.0f); // Default red theme
 inline std::string roblox_process_name;
+inline CrossInput::Key ChatKey = CrossInput::Key::Slash;
 
 // Debounces
-inline bool events[9] {
+inline bool events[10] {
     false, // Freeze
     false, // Laugh clip
     false, // E-Dance clip
@@ -41,9 +43,10 @@ inline bool events[9] {
     false, // Filler - do not use
     false, // gear clip
     false, // gear clip bind
+    false, // variable bind
 };
 
-inline bool enabled[9] {
+inline bool enabled[10] {
     true, // Freeze
     true, // Laugh clip
     false, // E-Dance clip
@@ -52,6 +55,7 @@ inline bool enabled[9] {
     true, // buckey clip
     false, // Speed glitch
     false, // Gear clip
+    false, // align / filler
     false, // align / filler
 };
 

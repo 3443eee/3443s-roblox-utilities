@@ -104,6 +104,17 @@ void UpdateUI() {
     ImGui::Text("3443's Roblox Utilities");
     ImGui::Separator();
     if (!is_elevated) {
+#ifdef _WIN32
+        ImGui::TextWrapped(
+            "This program needs administrator privileges to run.\n"
+            "Please run this program as administrator."
+        );
+        if (ImGui::Button("Exit", ImVec2(80.0f, 20.0f))) {
+            exit(0);
+        }
+        ImGui::End();
+        return;
+#else
         ImGui::TextWrapped(
             "This program needs administrator privileges to run.\n"
             "Please enter your password to elevate:"
@@ -133,6 +144,7 @@ void UpdateUI() {
 
         ImGui::End();
         return;
+#endif   
     }
     // Tab Bar
     if (ImGui::BeginTabBar("MainTabBar")) {
@@ -235,8 +247,8 @@ void UpdateUI() {
                 ImGui::Text("Freeze information:");
                 ImGui::Separator();
                 ImGui::TextWrapped("This macro freezes the roblox/sober process.\nIt allows for some pretty cool glitches.\n\nHere's a list of some glitches you can use it with.\n*All types of Lag high jumps\n*Extended dance/laugh clips\n*Cheer head glide\netc..");
-            } else if (current_option == "Laugh Clip") {
-                ImGui::Text("Laugh Clip information:");
+            } else if (current_option == "Extended Laugh Clip") {
+                ImGui::Text("Extended Laugh Clip information:");
                 ImGui::Separator();
                 ImGui::TextWrapped("This macro allows you to clip through walls of 1+ studs of thickness.\n\nTo use this macro, please set up yourself and the camera like below:\n");
                 float windowWidth = ImGui::GetContentRegionAvail().x;
@@ -355,6 +367,12 @@ void UpdateUI() {
             if (ImGui::Combo("##kb_layout", (int*)&kb_layout, string_kb_layouts, IM_ARRAYSIZE(string_kb_layouts))) {
                 printf("Selected layout: %s (index %d)\n", string_kb_layouts[kb_layout], kb_layout);
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Bind chat key")) {
+                BindVariable(&ChatKey);
+            }
+            ImGui::SameLine();
+            ImGui::Text(("Current: " + std::string(input.getKeyName(ChatKey))).c_str());
             ImGui::PopItemWidth();
 
             ImGui::Spacing();

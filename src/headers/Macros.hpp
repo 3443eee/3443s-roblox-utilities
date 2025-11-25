@@ -23,16 +23,17 @@ inline void laughClip() {
         events[1] = true;
         log("Laugh clip triggered");
 
-        input.pressKey(CrossInput::Key::Slash);
+        input.pressKey(ChatKey);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         if (kb_layout == 1) {
-            typeSlash();
+            typeSlashAzerty();
             input.typeText("e lqugh");
-            input.pressKey(CrossInput::Key::Enter);
         } else {
             input.typeText("/e laugh");
         }
+        input.pressKey(CrossInput::Key::Enter);
+
         std::this_thread::sleep_for(std::chrono::milliseconds(248));
         input.holdKey(CrossInput::Key::S);
         procctrl::suspend_processes_by_name(roblox_process_name);
@@ -64,11 +65,11 @@ inline void extendedDanceClip() {
         events[2] = true;
         log("Extended Dance clip triggered");
 
-        input.pressKey(CrossInput::Key::Slash);
+        input.pressKey(ChatKey);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         if (kb_layout == 1) {
-            typeSlash();
+            typeSlashAzerty();
             input.typeText("e dqnce");
             input.holdKey(CrossInput::Key::LShift);
             input.pressKey(CrossInput::Key::Num2);
@@ -77,6 +78,7 @@ inline void extendedDanceClip() {
             input.pressKey(CrossInput::Key::Enter);
         } else {
             input.typeText("/e dance2");
+            input.pressKey(CrossInput::Key::Enter);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(815));
@@ -105,16 +107,17 @@ inline void BuckeyClip() {
         events[5] = true;
         log("Buckey clip triggered");
 
-        input.pressKey(CrossInput::Key::Slash);
+        input.pressKey(ChatKey);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         if (kb_layout == 1) {
-            typeSlash();
-            input.typeText("e lqugh");
-            input.pressKey(CrossInput::Key::Enter);
+            typeSlashAzerty();
+            input.typeText("e lqugh");   
         } else {
             input.typeText("/e laugh");
-        } 
+        }
+
+        input.pressKey(CrossInput::Key::Enter);
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         // --- Space key ---
@@ -152,8 +155,7 @@ inline void SpamKeyMacro() {
         events[7] = true;
         log("Spam key triggering");
         input.pressKey(SpamKey, 1);
-    } else if (!key_pressed && events[7]) {
         events[7] = false;
-        log("Spam key triggering");
+        log("Spam key finished triggering");
     }
 }

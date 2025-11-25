@@ -14,6 +14,10 @@
 #define NOMINMAX
 #endif
 
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600  // Windows Vista or newer (TokenElevation)
+#endif
+
 // Rename Windows functions to avoid conflicts with Raylib
 #define Rectangle Win32Rectangle
 #define CloseWindow Win32CloseWindow
@@ -24,6 +28,7 @@
 
 #include <windows.h>
 #include <shellapi.h>
+#include <sddl.h>
 
 // Restore original names after Windows header is included
 #undef Rectangle
@@ -41,18 +46,31 @@
 
 inline bool isElevated() {
 #if defined(_WIN32)
-    BOOL isAdmin = FALSE;
-    PSID adminGroup;
+   // Try TokenElevation first (works on Vista+)
+    HANDLE token = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+        TOKEN_ELEVATION elevation;
+        DWORD returned = 0;
+        BOOL ok = GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &returned);
+        CloseHandle(token);
+        if (ok && returned == sizeof(elevation)) {
+            return elevation.TokenIsElevated != 0;
+        }
+    }
 
-    SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
-    if (AllocateAndInitializeSid(&ntAuthority, 2, 
-        SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS,
-        0,0,0,0,0,0, &adminGroup))
-    {
+    // Fallback: check membership of Administrators group (may be less accurate under UAC)
+    BOOL isAdmin = FALSE;
+    PSID adminGroup = NULL;
+    SID_IDENTIFIER_AUTHORITY ntAuth = SECURITY_NT_AUTHORITY;
+    if (AllocateAndInitializeSid(&ntAuth, 2,
+                                 SECURITY_BUILTIN_DOMAIN_RID,
+                                 DOMAIN_ALIAS_RID_ADMINS,
+                                 0,0,0,0,0,0,
+                                 &adminGroup)) {
         CheckTokenMembership(NULL, adminGroup, &isAdmin);
         FreeSid(adminGroup);
     }
-    return isAdmin;
+    return isAdmin != FALSE;
 #else
     return geteuid() == 0;
 #endif
@@ -147,7 +165,7 @@ inline void RunSilent(const std::string &cmd) {
     system(finalCmd.c_str());
 }
 
-inline void typeSlash() {
+inline void typeSlashAzerty() {
     input.holdKey(CrossInput::Key::LShift);
     std::this_thread::sleep_for(std::chrono::milliseconds(25));
     
@@ -194,6 +212,18 @@ inline void BindSpamKey() {
             SpamKey = userKey;
         }
         events[8] = false;
+    }
+}
+
+inline void BindVariable(CrossInput::Key* keyLoc) {
+    if (!events[9]) { 
+        events[9] = true;
+        CrossInput::Key userKey = input.getCurrentPressedKey(5000); // 5 sec timeout
+        if (userKey != static_cast<CrossInput::Key>(0)) {
+            std::cout << "[3RU] [inpctrl] Bound: " << input.getKeyName(userKey) << std::endl;
+            *keyLoc = userKey;
+        }
+        events[9] = false;
     }
 }
 

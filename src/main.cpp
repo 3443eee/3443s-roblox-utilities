@@ -39,18 +39,13 @@
 int main() {
 #if defined(__linux__)
     //Fix for unable to open display ":0" on wayland
-    runXhostPlus();
-    is_elevated = isElevated();
+    runXhostPlus(); 
 #endif
 
-#ifdef _WIN32
-    is_elevated = true;
-    InitWindow(500, 400, "3443's Roblox Utilities");
-#else
-     if (is_elevated) {
+    is_elevated = isElevated();
+    if (is_elevated) {
         InitWindow(500, 400, "3443's Roblox Utilities");
     } else InitWindow(300, 150, "3443's Roblox Utilities");
-#endif
     
     // No window border for windows :p
 #ifdef _WIN32
@@ -78,9 +73,8 @@ int main() {
 #else
     roblox_process_name = "sober";
 #endif
-
-    //temporary
-    kb_layout = 1;
+    
+    kb_layout = 0;
 
     initMacros();
     
@@ -96,7 +90,7 @@ int main() {
         Vector2 windowPos = GetWindowPosition();
         Vector2 mouseScreenPos = {windowPos.x + mousePos.x, windowPos.y + mousePos.y};
         
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
         {
             isDragging = true;
             // Store the offset from window position to mouse in screen coordinates
@@ -104,7 +98,7 @@ int main() {
             dragOffset.y = mouseScreenPos.y - windowPos.y;
         }
         
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+        if (IsMouseButtonReleased(MOUSE_RIGHT_BUTTON))
         {
             isDragging = false;
         }
