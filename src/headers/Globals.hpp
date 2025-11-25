@@ -33,7 +33,7 @@ inline std::string roblox_process_name;
 inline CrossInput::Key ChatKey = CrossInput::Key::Slash;
 
 // Debounces
-inline bool events[10] {
+inline bool events[12] {
     false, // Freeze
     false, // Laugh clip
     false, // E-Dance clip
@@ -44,9 +44,11 @@ inline bool events[10] {
     false, // gear clip
     false, // gear clip bind
     false, // variable bind
+    false, // Laugh Disable head collision
+    false, // nhc roof clip
 };
 
-inline bool enabled[10] {
+inline bool enabled[12] {
     true, // Freeze
     true, // Laugh clip
     false, // E-Dance clip
@@ -57,6 +59,8 @@ inline bool enabled[10] {
     false, // Gear clip
     false, // align / filler
     false, // align / filler
+    true, // disable head collision
+    true, // NHC roof clip
 };
 
 inline std::map<std::string, CrossInput::Key> Binds = {
@@ -66,7 +70,9 @@ inline std::map<std::string, CrossInput::Key> Binds = {
     {"Lag-switch", CrossInput::Key::F4}, // Lag switch
     {"Buckey-clip", CrossInput::Key::F5}, // Buckey clip
     {"Speedglitch", CrossInput::Key::F6}, // Speed glitch
-    {"Spam-Key", CrossInput::Key::F7} // Gear clip
+    {"Spam-Key", CrossInput::Key::F7}, // Gear clip
+    {"Disable-Head-Collision", CrossInput::Key::F8}, // No head collision
+    {"NHC-Roof", CrossInput::Key::Num9}, // NHC roof clip
 };
 
 inline unsigned short kb_layout;

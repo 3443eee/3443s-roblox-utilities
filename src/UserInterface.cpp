@@ -175,7 +175,12 @@ void UpdateUI() {
                     CodeName = "Speedglitch";
                 } else if (std::string(label) == "Spam key") {
                     CodeName = "Spam-Key";
+                } else if (std::string(label) == "Disable head collision") {
+                    CodeName = "Disable-Head-Collision";
+                } else if (std::string(label) == "NHC Roof Clip") {
+                    CodeName = "NHC-Roof";
                 }
+
                 // Determine if this option is enabled
                 bool isEnabled = enabled[GetIDFromCodeName(CodeName)];
 
@@ -237,6 +242,8 @@ void UpdateUI() {
             DrawOptionButton("Buckey clip");
             DrawOptionButton("Speed glitch");
             DrawOptionButton("Spam key");
+            DrawOptionButton("Disable head collision");
+            DrawOptionButton("NHC Roof Clip");
 
             ImGui::EndChild();
 
@@ -313,6 +320,36 @@ void UpdateUI() {
 
                 rlImGuiImageSize(&LoadedTextures[3], 248, 140);
                 ImGui::TextWrapped("After this, it's pretty straightforward, just trigger the macro and hold W! This glitch can be rng, but you'll get it, especially with low fps.");
+            } else if (current_option == "Disable head collision") {
+                ImGui::Text("Disable head collision information:");
+                ImGui::Separator();
+                ImGui::TextWrapped("This macro allows you to disable your head collision with laugh clipping, this is necessary for some other fun glitches\n\nTo do this, please set up yourself and the camera as close as below:\n");
+                float windowWidth = ImGui::GetContentRegionAvail().x;
+                float imageWidth = 248.0f;
+                float offset = (windowWidth - imageWidth) * 0.5f;
+
+                if (offset > 0.0f)
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                rlImGuiImageSize(&LoadedTextures[4], 248, 140);
+                ImGui::TextWrapped("After this, it's pretty straightforward, just trigger the macro! This glitch can be rng, but you'll get it.");
+            } else if (current_option == "NHC Roof Clip") {
+                ImGui::Text("NHC Roof Clip information:");
+                ImGui::Separator();
+                ImGui::TextColored(orange, "Targetted FPS: 40-60.\nNeeds no head collision.");
+                if (ImGui::Button("Disable head collision")) {
+                    current_option = "Disable head collision";
+                }
+                ImGui::TextWrapped("This macro allows you to clip through a 1+ stud thick roof with no head collision.\n\nTo do this, please have make sure you have a platform above your head like this.\n");
+                float windowWidth = ImGui::GetContentRegionAvail().x;
+                float imageWidth = 248.0f;
+                float offset = (windowWidth - imageWidth) * 0.5f;
+
+                if (offset > 0.0f)
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+
+                rlImGuiImageSize(&LoadedTextures[5], imageWidth, 140);
+                ImGui::TextWrapped("After this, it's pretty straightforward, just trigger the macro! This glitch can be rng, but you'll get it.\nAlso make sure you have head collision disabled!!!");
             } else {
                 ImGui::Text("Welcome to 3443's roblox utilities!");
                 ImGui::Separator();

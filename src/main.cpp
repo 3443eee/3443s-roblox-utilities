@@ -28,6 +28,7 @@
 #include "imgui.h"
 #include "rlImGui.h"
 #include "LoadTextures.hpp"
+#include "SettingsHandler.hpp"
 
 #include <iostream>
 #include <string>
@@ -52,22 +53,7 @@ int main() {
     SetWindowState(FLAG_WINDOW_UNDECORATED);
 #endif
     
-    SetTargetFPS(60);
-
-    //Initializes the user interface.
-    initUI();
-    LoadAllSprites();
-    
-    //Initlializes the ctrl object for netctrl
-    
-    g_ctrl = &ctrl;
-
-    //Initializes the input object.
-    if (!input.init()) {
-        std::cerr << "Failed to initialize input system!\n";
-        return 1;
-    }
-    
+    // Default values
 #ifdef _WIN32
     roblox_process_name = "RobloxPlayerBeta.exe";
 #else
@@ -76,8 +62,26 @@ int main() {
     
     kb_layout = 0;
 
-    initMacros();
+    SetTargetFPS(60);
+
+    //-------- LOADING THE FREAKING SETTINGS 
+    SettingsHandler::LoadSettings();
     
+    //Initializes the user interface.
+    initUI();
+    LoadAllSprites();
+
+    //Initlializes the ctrl object for netctrl
+    g_ctrl = &ctrl;
+
+    //Initializes the input object.
+    if (!input.init()) {
+        std::cerr << "Failed to initialize input system!\n";
+        return 1;
+    }
+
+    initMacros();
+
     Vector2 dragOffset = {0};
     bool isDragging = false;
     
@@ -129,8 +133,10 @@ int main() {
     }
 
     // Cleanup
+    SettingsHandler::SaveSettings();
     input.cleanup();
     rlImGuiShutdown();
+    UnloadAllTextures();
     CloseWindow();
     return 0;
 }

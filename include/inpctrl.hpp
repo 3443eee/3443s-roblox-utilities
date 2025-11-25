@@ -389,16 +389,34 @@ private:
     void holdKeyWindows(unsigned int vkCode) {
         INPUT input = {0};
         input.type = INPUT_KEYBOARD;
-        input.ki.wVk = vkCode;
-        input.ki.dwFlags = 0;
+        
+        // For the slash key (and other OEM keys), use scan code
+        if (vkCode == 0xBF) {  // VK_OEM_2 (slash key)
+            input.ki.wScan = 0x35;  // Hardware scan code for /
+            input.ki.dwFlags = KEYEVENTF_SCANCODE;
+        } else {
+            input.ki.wVk = vkCode;
+            input.ki.wScan = MapVirtualKey(vkCode, MAPVK_VK_TO_VSC);
+            input.ki.dwFlags = 0;
+        }
+        
         SendInput(1, &input, sizeof(INPUT));
     }
-    
+
     void releaseKeyWindows(unsigned int vkCode) {
         INPUT input = {0};
         input.type = INPUT_KEYBOARD;
-        input.ki.wVk = vkCode;
-        input.ki.dwFlags = KEYEVENTF_KEYUP;
+        
+        // For the slash key (and other OEM keys), use scan code
+        if (vkCode == 0xBF) {  // VK_OEM_2 (slash key)
+            input.ki.wScan = 0x35;  // Hardware scan code for /
+            input.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+        } else {
+            input.ki.wVk = vkCode;
+            input.ki.wScan = MapVirtualKey(vkCode, MAPVK_VK_TO_VSC);
+            input.ki.dwFlags = KEYEVENTF_KEYUP;
+        }
+        
         SendInput(1, &input, sizeof(INPUT));
     }
     

@@ -159,3 +159,73 @@ inline void SpamKeyMacro() {
         log("Spam key finished triggering");
     }
 }
+
+inline void DisableHeadCollision() {
+    bool key_pressed = input.isKeyPressed(Binds["Disable-Head-Collision"]);
+    if (key_pressed && !events[10]) {
+        events[10] = true;
+        log("Disable-Head-Collision triggered");
+
+        input.pressKey(ChatKey);
+        std::this_thread::sleep_for(std::chrono::milliseconds(248));
+
+        if (kb_layout == 1) {
+            typeSlashAzerty();
+            input.typeText("e lqugh");   
+        } else {
+            input.typeText("/e laugh");
+        }
+
+        input.pressKey(CrossInput::Key::Enter);
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+        input.holdKey(CrossInput::Key::LShift);
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        input.releaseKey(CrossInput::Key::LShift);
+
+        input.holdKey(CrossInput::Key::Space);
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        input.releaseKey(CrossInput::Key::Space);
+
+        input.holdKey(CrossInput::Key::LShift);
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        input.releaseKey(CrossInput::Key::LShift);
+        
+        events[10] = false;
+        log("Disable-Head-Collision finished");
+    }
+}
+
+inline void NHCRoofClip() {
+    bool key_pressed = input.isKeyPressed(Binds["NHC-Roof"]);
+    if (key_pressed && !events[11]) {
+        events[11] = true;
+        log("NHC-Roof clip triggered");
+
+        input.pressKey(ChatKey);
+        std::this_thread::sleep_for(std::chrono::milliseconds(248));
+
+        if (kb_layout == 1) {
+            typeSlashAzerty();
+            input.typeText("e cheer", 20);   
+        } else {
+            input.typeText("/e cheer", 20);
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        input.pressKey(CrossInput::Key::Enter);
+        std::this_thread::sleep_for(std::chrono::milliseconds(610));
+
+        input.holdKey(CrossInput::Key::Space);
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        procctrl::suspend_processes_by_name(roblox_process_name);
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        procctrl::resume_processes_by_name(roblox_process_name);
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        input.releaseKey(CrossInput::Key::Space);
+
+        events[11] = false;
+        log("NHC-Roof clip finished");
+    }
+}

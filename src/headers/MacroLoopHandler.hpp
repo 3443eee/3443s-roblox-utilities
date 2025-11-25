@@ -16,4 +16,6 @@ inline void UpdateMacros() {
     if (enabled[5]) BuckeyClip();
     if (enabled[6]) speedglitchMacro();
     if (enabled[7]) SpamKeyMacro();
+    if (enabled[10]) DisableHeadCollision();
+    if (enabled[11]) NHCRoofClip();
 }

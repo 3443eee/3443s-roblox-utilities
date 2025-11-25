@@ -242,5 +242,9 @@ inline unsigned short GetIDFromCodeName(std::string CodeName) {
         return 6;
     } else if (CodeName == "Spam-Key") {
         return 7;
+    } else if (CodeName == "Disable-Head-Collision") {
+        return 10;
+    } else if (CodeName == "NHC-Roof") {
+        return 11;
     } else return 2000;
 }
