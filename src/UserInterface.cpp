@@ -213,10 +213,15 @@ void UpdateUI() {
                 }
 
                 if (current_option == label) {
+                    // Calculate available width for the child frame
+                    float availableWidth = ImGui::GetContentRegionAvail().x;
+                    
                     if (CodeName == "Spam-Key") {
-                        ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), ImVec2(0, 120), true);
+                        ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), 
+                                        ImVec2(availableWidth, 120), true);
                     } else {
-                        ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), ImVec2(0, 80), true);
+                        ImGui::BeginChild(std::string(label + std::string("_frame")).c_str(), 
+                                        ImVec2(availableWidth, 80), true);
                     }
 
                     ImGui::TextWrapped("Enabled: %s", enabled[GetIDFromCodeName(CodeName)] ? "Yes" : "No");
@@ -410,6 +415,25 @@ void UpdateUI() {
             }
             ImGui::SameLine();
             ImGui::Text(("Current: " + std::string(input.getKeyName(ChatKey))).c_str());
+            ImGui::Checkbox("Window always on top", &windowOnTop);
+#ifdef _WIN32
+            ImGui::Checkbox("Decorated window (title bar) (100% DPI recommended)", &decorated_window);
+
+            // Disable the "Resizable window" checkbox if decorated_window is false
+            if (!decorated_window)
+                ImGui::BeginDisabled();
+
+            ImGui::Checkbox("Resizable window (100% DPI recommended)", &resizable_window);
+
+            // Add explanation text on the same line
+            if (!decorated_window)
+            {
+                ImGui::SameLine();
+                ImGui::TextDisabled("(requires decorated window)");
+                ImGui::EndDisabled();
+            }
+
+#endif      
             ImGui::PopItemWidth();
 
             ImGui::Spacing();

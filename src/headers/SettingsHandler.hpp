@@ -45,6 +45,8 @@ inline namespace SettingsHandler {
         j["rainbowSpeed"] = rainbowSpeed;
         j["rainbowSaturation"] = rainbowSaturation;
         j["rainbowValue"] = rainbowValue;
+        j["resizable_window"] = resizable_window;
+        j["decorated_window"] = decorated_window;
 
         std::ofstream file(SETTINGS_FILE);
         file << j.dump(4);
@@ -106,7 +108,14 @@ inline namespace SettingsHandler {
         if (j.contains("rainbowSaturation"))
             rainbowSaturation = j["rainbowSaturation"].get<float>();
 
-        if (j.contains("rainbowValue"))
-            rainbowValue = j["rainbowValue"].get<float>();
+        if (j.contains("resizable_window")) {
+            resizable_window = j["resizable_window"].get<float>();
+            lastResizable = resizable_window;
+        }
+        
+        if (j.contains("decorated_window")) {
+            decorated_window = j["decorated_window"];
+            lastDecorated = decorated_window;
+        }       
     }
 }

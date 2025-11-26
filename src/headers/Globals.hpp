@@ -13,6 +13,13 @@ inline bool is_elevated;
 inline CrossInput input;
 inline char passwordBuffer[256] = "";
 inline bool elevationFailed = false;
+inline bool decorated_window = false;
+inline bool resizable_window = false;
+inline bool windowOnTop = false;
+
+inline bool lastDecorated = decorated_window;
+inline bool lastResizable = resizable_window;
+inline bool lastWindowOnTop = windowOnTop;
 
 // Macro specific
 //-- Speed glitch
